@@ -1,6 +1,6 @@
 // Disambiguate between multiple PWAs potentially being hosted on the same subdomain
 const cachePrefix = "timezone-comparison-";
-const currentCacheName = cachePrefix + "2026-11-03";
+const currentCacheName = cachePrefix + "2026-11-03_001";
 
 const addResourcesToCache = async (resources) => {
     const cache = await caches.open(currentCacheName);
@@ -55,8 +55,6 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("install", (event) => {
-    self.skipWaiting();
-    
     event.waitUntil(
         addResourcesToCache([
             // Only pre-cache critical assets
@@ -81,3 +79,10 @@ self.addEventListener("fetch", (event) => {
         cacheFirst(event.request)
     );
 });
+
+// See: https://progressier.com/handling-service-worker-updates
+self.addEventListener("message", (event) => {
+    if (event.data === "SKIP_WAITING") {
+        self.skipWaiting();
+    }
+})

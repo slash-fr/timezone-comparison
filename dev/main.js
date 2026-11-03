@@ -30,21 +30,57 @@ document.addEventListener("DOMContentLoaded", (event) => {
 });
 
 // Service worker, for offline mode:
-const registerServiceWorker = async () => {
-    if ("serviceWorker" in navigator) {
-        try {
-            const registration = await navigator.serviceWorker.register("service-worker.js");
-            
-            navigator.serviceWorker.addEventListener("controllerchange", (event) => {
-                document.getElementById("add-button").style.display = "none";
-                document.getElementById("reload-button").style.display = "block";
-            });
-            
-        } catch (error) {
-            console.error(`Service worker registration failed with ${error}`);
+// See: https://progressier.com/handling-service-worker-updates
+/**
+ * @param {ServiceWorkerRegistration} registration 
+ */
+function invokeServiceWorkerUpdateFlow(registration) {
+    document.getElementById("add-button").style.display = "none";
+    const reloadButton = document.getElementById("reload-button");
+    reloadButton.style.display = "block";
+    reloadButton.addEventListener("click", () => {
+        if (registration.waiting) {
+            registration.waiting.postMessage("SKIP_WAITING");
         }
-    }
-};
+    })
+}
 
-registerServiceWorker();
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+        const registration = await navigator.serviceWorker.register("service-worker.js");
 
+        // Ensure the case when the updatefound event was missed is also handled
+        // by re-invoking the prompt when there's a waiting Service Worker
+        if (registration.waiting) {
+            invokeServiceWorkerUpdateFlow(registration);
+        }
+
+        // Detect when a Service Worker update is available and wait for it to become installed
+        registration.addEventListener("updatefound", () => {
+            if (registration.installing) {
+                // Wait until the new Service worker is actually installed (ready to take over)
+                registration.installing.addEventListener("statechange", () => {
+                    if (registration.waiting) {
+                        // If there's an existing controller (previous Service Worker), show the "reload" button
+                        if (navigator.serviceWorker.controller) {
+                            invokeServiceWorkerUpdateFlow(registration);
+                         } else {
+                            // Otherwise it's the first install, nothing to do
+                            //console.log("Service Worker initialized for the first time.");
+                        }
+                    }
+                })
+            }
+        })
+
+        let refreshing = false;
+
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (!refreshing) {
+                //console.log("Refreshing (controllerchange)");
+                window.location.reload();
+                refreshing = true;
+            }
+        })
+    })
+}
