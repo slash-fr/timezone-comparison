@@ -1,0 +1,908 @@
+:root {
+    --toolbar-height: 48px;
+    --toolbar-color: light-dark(#f0f0f0, #323232);
+    --menu-color: light-dark(#f8f8f8, #4a4a4a);
+    --button-hover-background: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.25));
+    --button-active-background: light-dark(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.125));
+    --main-background-color: light-dark(#e0e0e0, #080808);
+    --main-font-color: light-dark(#222, #fff);
+    --main-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Adjusted", "Segoe UI", "Liberation Sans", sans-serif;
+    --monospaced-font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", Menlo, Monaco, Consolas, monospace;
+    --overlay-background: light-dark(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.5));
+    --dialog-background: light-dark(#f0f0f0, #323232);
+    --shadow-color: light-dark(#a0a0a0, #080808);
+    --shadow-color-transparent: light-dark(#a0a0a000, #08080800);
+    --timeline-shadow-color: light-dark(#c0c0c0, #888);
+    --link-color: light-dark(#4040c0, #88f);
+    --control-color: light-dark(#a0e0a0, #408040);
+    --control-hover-color: light-dark(#b8f0b8, #50a050);
+    --control-active-color: light-dark(#a0e0a0, #408040);
+    --checkbox-off-color: light-dark(#008000a0, #a0f0a0a0);
+    --checkbox-off-hover-color: light-dark(#00800070, #a0f0a0d0);
+    --checkbox-off-active-color: light-dark(#008000a0, #a0f0a0a0);
+    --timeline-background-color-summer: light-dark(#fff, #282828);
+    --timeline-background-color-winter: light-dark(#f0f0f0, #181818);
+    --timeline-background-color-odd: light-dark(#f0f0f0, #181818);
+    --timeline-background-color-even: light-dark(#fff, #282828);
+    --time-indicator-background-color: light-dark(#fff, #181818);
+    --indicator-color: light-dark(#008000, #a0f0a0);
+    --highlighted-hours-color-odd: light-dark(#b0f0b0, #285028);
+    --highlighted-hours-color-even: light-dark(#c0f8c0, #306030);
+    --border-color: light-dark(#a0a0a0, #a0a0a0);
+    /* FAB: Floating Action Button */
+    --fab-background: light-dark(#50a050, #a0e0a0);
+    --fab-background-hover: light-dark(#60b060, #b8f0b8);
+    --fab-background-active: light-dark(#50a050, #a0e0a0);
+    --fab-font-color: light-dark(#fff, #181818);
+    --fab-shadow-color: light-dark(#808080, #888);
+    --search-field-background: light-dark(#fff, #323232);
+    --search-border-radius: 18px;
+    --overlay-shadow-color: light-dark(#606060, #080808);
+    --close-button-hover-background: light-dark(#f0f0f0, #606060);
+    --close-button-active-background: light-dark(#e0e0e0, #4a4a4a);
+    --delete-button-background: light-dark(#f04040, #a00000);
+    --delete-button-hover-background: light-dark(#f86060, #c00000);
+    --delete-button-active-background: light-dark(#e02020, #800000);
+}
+@media (prefers-reduced-transparency: reduce) {
+    body {
+        --overlay-background: light-dark(#f0f0f0, #181818);
+    }
+}
+
+html {
+    overscroll-behavior: none;
+}
+body {
+    margin: 0;
+    padding: 0;
+    width: 100dvw;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--main-background-color);
+    font-family: var(--main-font-family);
+    font-size: 16px;
+    color: var(--main-font-color);
+    accent-color: var(--control-color);
+}
+strong {
+    font-weight: 600;
+}
+
+/******************************************************************************/
+/* UI style */
+
+span.warning-icon {
+    display: inline-block;
+    height: 21px;
+    vertical-align: text-bottom;
+    opacity: 0.5;
+}
+#toolbar {
+    position: absolute;
+    width: 100%;
+    z-index: 5;
+    height: var(--toolbar-height);
+    padding: 0;
+    background: var(--toolbar-color);
+}
+h1 {
+    text-align: center;
+    font-size: 18px;
+    line-height: 24px;
+    padding: 12px;
+    margin: 0;
+    font-weight: 600;
+}
+#right-buttons {
+    position: absolute;
+    right: 0;
+    padding-right: 7px;
+}
+button {
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    margin: 4px;
+    cursor: pointer;
+    color: var(--main-font-color);
+    border-radius: 100%;
+    font-size: 16px;
+    font-family: var(--main-font-family);
+}
+button:hover, button:focus {
+    background: var(--button-hover-background);
+}
+button:active {
+    background: var(--button-active-background);
+}
+#menu-button.menu-is-open {
+    pointer-events: none;
+    background: var(--button-active-background);
+}
+#menu {
+    visibility: hidden;
+    position: absolute;
+    top: var(--toolbar-height);
+    right: 8px;
+    margin: -8px 0 0 0;
+    z-index: 5;
+    box-shadow: 0 0 5px var(--shadow-color);
+    padding: 5px;
+    background: var(--menu-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    /* Don't accidentally select text */
+    -webkit-user-select: none;
+    user-select: none;
+    /* Animate in/out */
+    opacity: 0;
+    transform: translate(0, -10px);
+    transition: opacity 0.1s ease-out, transform 0.1s ease-out, visibility 0s linear 0.1s;
+}
+#menu.visible {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(0, 0);
+    transition-delay: 0s;
+}
+#menu button {
+    display: block;
+    padding: 10px;
+    width: 100%;
+    height: 44px;
+    margin: 0;
+    text-align: left;
+    line-height: 24px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+#menu svg {
+    vertical-align: top;
+    margin-right: 5px;
+}
+div.dialog-overlay {
+    visibility: hidden;
+    backdrop-filter: blur(0);
+    opacity: 0;
+    transition: backdrop-filter 0.2s ease-out, opacity 0.2s ease-out, visibility 0s ease-out 0.2s;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--overlay-background);
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Horizontal alignment (cross axis) */
+    justify-content: center; /* Vertical alignment (main axis) */
+}
+div.dialog-overlay.visible {
+    visibility: visible;
+    opacity: 1;
+    backdrop-filter: blur(16px);
+    transition-delay: 0s;
+}
+div.dialog-content {
+    visibility: hidden;
+    position: relative;
+    max-width: 400px;
+    padding: 10px 16px 16px 16px;
+    border-radius: 10px;
+    background: var(--dialog-background);
+    box-shadow: 0 0 10px var(--overlay-shadow-color);
+    transform: scale(0);
+    transition: transform 0.2s ease-out, visibility 0s linear 0.2s;
+}
+div.dialog-overlay.visible div.dialog-content {
+    visibility: visible;
+    transform: scale(1);
+    transition-delay: 0s;
+}
+div.dialog-overlay h2 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    padding: 4px 0;
+    text-align: center;
+    margin: 20px 0;
+}
+div.dialog-content h2 {
+    margin: 0 40px 20px 0; /* 40px padding-right, to make room for the close button */
+}
+div.dialog-overlay h2 svg {
+    vertical-align: top;
+    margin-right: 10px;
+}
+button.close-button {
+    position: fixed;
+    z-index: 7;
+    top: 0;
+    right: 0;
+    padding: 4px;
+    background: var(--dialog-background);
+    box-shadow: 0 0 10px var(--overlay-shadow-color);
+}
+button.close-button:hover, button.close-button:focus {
+    background: var(--close-button-hover-background);
+}
+button.close-button:active {
+    background: var(--close-button-active-background);
+}
+/* Close buttons *inside* dialogs are styled slightly differently from close buttons on top of transparent overlays */
+div.dialog-content button.close-button {
+    position: absolute;
+    box-shadow: none;
+}
+/* ".overlay-content" is for transparent overlays without an opaque dialog inside */
+div.overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    scrollbar-gutter: stable both-edges;
+    width: 100%;
+}
+div.overlay-content h2 {
+    background: var(--dialog-background);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--overlay-shadow-color);
+    padding: 10px 20px;
+    width: max-content;
+}
+#timezone-management-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 10px 20px 10px;
+}
+#timezone-management-list li {
+    background: var(--dialog-background);
+    border-radius: 10px;
+    padding: 10px 60px 10px 15px;
+    margin: 10px 0;
+    position: relative;
+    user-select: none;
+    box-shadow: 0 0 10px var(--overlay-shadow-color);
+}
+#timezone-management-list button.delete-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    border-radius: 0 10px 10px 0;
+    margin: 0;
+    padding: 8px;
+    width: 45px;
+}
+button.delete-button {
+    background: var(--delete-button-background);
+    border: 1px solid light-dark(var(--dialog-background), var(--delete-button-background));
+}
+button.delete-button:hover, button.delete-button:focus {
+    background: var(--delete-button-hover-background);
+    border-color: light-dark(var(--dialog-background), var(--delete-button-hover-background));;
+}
+button.delete-button:active {
+    background: var(--delete-button-active-background);
+    border-color: light-dark(var(--dialog-background), var(--delete-button-active-background));;
+}
+button.delete-button svg {
+    vertical-align: bottom;
+    color: #fff;
+}
+#fix-timezone-order-button, #reload-button {
+    background: var(--control-color);
+    width: auto;
+    border-radius: 10px;
+    padding: 10px 20px;
+    line-height: 24px;
+    height: 68px;
+}
+#fix-timezone-order-button:hover, #fix-timezone-order-button:focus {
+    background: var(--control-hover-color);
+}
+#fix-timezone-order-button:active {
+    background: var(--control-active-color);
+}
+#fix-timezone-order-button svg, #reload-button svg {
+    margin: 8px 20px 8px 0;
+    float: left;
+}
+#fix-timezone-order-button span, #reload-button span {
+    float: right;
+    text-align: left;
+}
+a {
+    color: var(--link-color);
+}
+#link-to-source-code {
+    text-wrap: nowrap;
+    position: absolute;
+    max-width: calc(100% - 32px);
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+label {
+    cursor: pointer;
+    position: relative;
+    /* Don't accidentally select text */
+    -webkit-user-select: none;
+    user-select: none;
+}
+input[type=checkbox] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+input[type=checkbox] + label {
+    padding: 10px;
+    padding-left: 36px;
+    line-height: 32px;
+}
+input[type=checkbox]:focus-visible + label {
+    outline: auto;
+}
+svg.empty-checkbox, svg.checked-checkbox {
+    position: absolute;
+    left: 0;
+}
+svg.empty-checkbox {
+    color: var(--checkbox-off-color);
+}
+label:hover svg.empty-checkbox {
+    color: var(--checkbox-off-hover-color);
+}
+label:active svg.empty-checkbox {
+    color: var(--checkbox-off-active-color);
+}
+svg.checked-checkbox {
+    visibility: hidden;
+}
+input:checked + label svg.checked-checkbox {
+    visibility: visible;
+    color: var(--control-color);
+    /* Hack: Change the check mark color (which is transparent by default), without creating an ugly "border" */
+    background: linear-gradient(var(--main-font-color)) no-repeat;
+    /* Technically, "linear-gradient()" is a *background-image* here - not a background-color. */
+    /* And, yes, gradients with only one color are perfectly valid. */
+    background-position: 6px 6px;
+    background-size: 20px 20px;
+}
+input:checked + label:hover svg.checked-checkbox {
+    color: var(--control-hover-color);
+}
+input:checked + label:active svg.checked-checkbox {
+    color: var(--control-active-color);
+}
+input:checked + label svg.empty-checkbox {
+    visibility: hidden;
+}
+.disabled {
+    opacity: 0.5;
+}
+#highlighted-hours-detail {
+    margin-bottom: 0;
+}
+.select-wrapper {
+    display: inline-block;
+    border-radius: 5px;
+    position: relative;
+}
+.select-wrapper svg {
+    position: absolute;
+    right: 5px;
+    top: 9px;
+    pointer-events: none;
+    transition: transform 0.25s;
+}
+select {
+    border: 0;
+    border-radius: 5px;
+    padding: 10px 34px 10px 10px;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 21px;
+    appearance: none;
+    color: var(--main-font-color);
+    cursor: pointer;
+    background: var(--control-color);
+    scrollbar-width: thin;
+}
+select:hover {
+    background: var(--control-hover-color);
+}
+select:active, select:open {
+    background: var(--control-active-color);
+}
+select:open + svg { /* :open has "Baseline" compatibility since may 2026. Let's use it. */
+    transform: rotate(-180deg);
+}
+option {
+    background: var(--control-active-color);
+}
+.disabled select {
+    pointer-events: none;
+}
+div.dialog-content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 32px 0 16px 0;
+}
+div.radio-button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+div.radio-button-group input[type=radio] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+div.radio-button-group label {
+    font-size: 16px;
+    line-height: 24px;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+}
+div.radio-button-group label:hover {
+    background-color: var(--button-hover-background);
+}
+div.radio-button-group label:active {
+    background-color: var(--button-active-background);
+}
+div.radio-button-group input:checked + label {
+    background-color: var(--control-color);
+}
+div.radio-button-group input:checked + label:hover {
+    background: var(--control-hover-color);
+}
+div.radio-button-group input:checked + label:active {
+    background: var(--control-active-color);
+}
+div.radio-button-group input:focus-visible + label {
+    outline: auto;
+}
+div.radio-button-group label svg {
+    vertical-align: top;
+}
+div.radio-button-group svg.on-radio-icon, div.radio-button-group input:checked + label svg.off-radio-icon {
+    display: none;
+}
+div.radio-button-group svg.off-radio-icon, div.radio-button-group input:checked + label svg.on-radio-icon {
+    display: inline;
+}
+#reload-button, #add-button {
+    position: fixed;
+    bottom: 20px;
+    z-index: 4;
+    background: var(--fab-background);
+    color: var(--fab-font-color);
+    box-shadow: 0 0 10px var(--fab-shadow-color);
+}
+#reload-button {
+    left: 50%;
+    transform: translate(-50%);
+    width: max-content;
+}
+#add-button {
+    right: 20px;
+    box-sizing: content-box;
+    width: 24px;
+    height: 24px;
+    padding: 12px;
+}
+#reload-button:hover, #add-button:hover,
+#reload-button:focus, #add-button:focus {
+    background: var(--fab-background-hover);
+}
+#reload-button:active, #add-button:active {
+    background: var(--fab-background-active);
+}
+#search-overlay {
+    justify-content: start; /* Vertical alignment (main axis) */
+    padding: 10vh 20px 10px 20px;
+    box-sizing: border-box;
+}
+#search-control {
+    width: 100%;
+    max-width: 700px;
+    box-sizing: border-box;
+    position: relative;
+}
+#search-icon {
+    position: absolute;
+    left: 12px;
+    top: 7px;
+    opacity: 0.5;
+}
+#search-field {
+    width: 100%;
+    padding: 5px 10px 5px 45px;
+    font-family: var(--main-font-family);
+    font-size: 16px;
+    line-height: 24px;
+    border-radius: var(--search-border-radius);
+    border: none;
+    outline: none;
+    background-color: var(--search-field-background);
+}
+@media (prefers-reduced-transparency: reduce) {
+    #search-field {
+        /* Improve contrast over the overlay background */
+        border: 1px solid var(--border-color);
+    }
+}
+#search-field::placeholder {
+    color: var(--main-font-color);
+    opacity: 0.5;
+}
+#search-field:focus {
+    border: none;
+    box-shadow: 0 0 10px var(--overlay-shadow-color);
+}
+#search-field:focus + #search-icon {
+    opacity: 1;
+}
+#search-control.results-visible #search-field {
+    box-shadow: 0 0 10px var(--overlay-shadow-color);
+    border: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px solid var(--border-color);
+}
+#search-results {
+    /* Container DIV, necessary to prevent the UL scrollbar from messing with the bottom-right corner radius. */
+    display: none;
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom-left-radius: var(--search-border-radius);
+    border-bottom-right-radius: var(--search-border-radius);
+    box-shadow: 0 0 10px var(--overlay-shadow-color);
+    overflow: hidden;
+}
+#search-results ul {
+    width: 100%;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    background: var(--dialog-background);
+    max-height: calc(90vh - 60px);
+    overflow-y: auto;
+    position: relative;
+}
+#search-results li {
+    display: block;
+    padding: 10px 10px 0 10px;
+    margin: 0;
+}
+#search-results li:last-child {
+    padding: 10px;
+}
+#search-control.results-visible #search-results {
+    display: block;
+}
+#search-results #too-many-timezones {
+    position: relative;
+    display: none;
+}
+#search-results #too-many-timezones.visible {
+    /* To avoid displaying "too many timezones" when "No results" is shown, add: */
+    /* :not(:nth-last-child(2)) */
+    display: block;
+}
+#too-many-timezones span.warning-icon {
+    display: block;
+    width: 45px;
+    text-align: center;
+    position: absolute;
+    left: 0;
+    top: calc(7px + 50%);
+    transform: translate(0, -50%);
+}
+#too-many-timezones span.warning-message {
+    font-style: italic;
+    display: block;
+    margin-left: 35px;
+    opacity: 0.67;
+}
+li#no-results {
+    display: none;
+}
+li#no-results:last-child {
+    display: block;
+    padding-left: 45px;
+}
+li.search-result button {
+    width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    margin: 0;
+    border-radius: 10px;
+    padding: 5px 10px 5px 34px;
+    text-align: left;
+    position: relative;
+    outline: none;
+}
+li.search-result button svg {
+    position: absolute;
+    left: 1px; /* Center the icon between the text and the left edge of the "li" element */
+    transition: left 0.2s;
+    top: 50%;
+    transform: translate(0, -50%);
+    opacity: 0.8;
+}
+li.search-result button:hover svg, li.search-result button:focus svg {
+    opacity: 1;
+    left: 5px; /* Center the icon between the text and the left edge of the "button" element */
+}
+li.search-result button:disabled {
+    opacity: 0.67;
+    pointer-events: none;
+}
+
+/******************************************************************************/
+/* Timeline style */
+
+#viewport {
+    width: 100%;
+    height: 100%;
+    padding-top: var(--toolbar-height);
+    padding-bottom: 96px; /* Leave some room, to be able to show the "Add" button over a blank background. */
+    box-sizing: border-box;
+    overflow: auto;
+    scrollbar-width: none; /* Yes, that's evil... */
+    /* ...but the horizontal scrollbar going back and forth due to the "infinite scrolling" feature was disturbing. */
+    cursor: grab;
+    /* Don't accidentally select text */
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 14px;
+}
+@media (any-pointer: coarse) {
+    #viewport {
+        /* Unfortunately, it is necessary to "hijack" the native scrolling feature, when touch scrolling is available,
+        /* because it really doesn't play well with our infinite scroll. Sorry about that... */
+        overflow: hidden;
+    }
+}
+#top-line, #bottom-line {
+    /* For some reason, a proper border-top + border-bottom on #viewport wasn't working */
+    background: var(--indicator-color);
+    width: 100%;
+    height: 3px;
+    position: fixed;
+    z-index: 4;
+    pointer-events: none;
+}
+#top-line {
+    top: var(--toolbar-height);
+}
+#bottom-line {
+    bottom: 0;
+}
+#top-gradient, #bottom-gradient {
+    width: 100%;
+    height: 20px;
+    position: fixed;
+    z-index: 4;
+    pointer-events: none;
+    visibility: hidden;
+}
+#top-gradient {
+    top: var(--toolbar-height);
+    background: linear-gradient(
+        180deg,
+        var(--shadow-color),
+        var(--shadow-color-transparent) 20px
+    );
+}
+#bottom-gradient {
+    bottom: 0;
+    background: linear-gradient(
+        0deg,
+        var(--shadow-color),
+        var(--shadow-color-transparent) 20px
+    );
+}
+#left-gradient, #right-gradient {
+    width: 20px;
+    height: 100%;
+    position: fixed;
+    z-index: 4;
+    pointer-events: none;
+}
+#left-gradient {
+    left: 0;
+    background: linear-gradient(
+        90deg,
+        var(--shadow-color),
+        var(--shadow-color-transparent) 20px
+    );
+}
+#right-gradient {
+    right: 0;
+    background: linear-gradient(
+        -90deg,
+        var(--shadow-color),
+        var(--shadow-color-transparent) 20px
+    );
+}
+#vertical-line {
+    width: 3px;
+    height: 100%;
+    background: var(--indicator-color);
+    position: fixed;
+    left: calc(50% - 1.5px);
+    z-index: 2;
+}
+#noscript, #loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    margin: 0;
+    box-sizing: border-box;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--main-background-color);
+    color: var(--main-font-color);
+    font-size: 18px;
+}
+div.timezone {
+    margin: 0;
+}
+h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: normal;
+    z-index: 3;
+}
+.fixed-horizontally {
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 3;
+}
+table.timeline {
+    margin-top: 30px;
+    table-layout: fixed; /* Don't let cells grow wider than 60px */
+    border-spacing: 0;
+    border-collapse: collapse;
+    box-shadow: 0 0 10px var(--timeline-shadow-color);
+}
+td.day, td.timezone {
+    height: 20px; /* Total height = 20px + 2 x 10px (paddings) = 40px */
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    overflow: hidden;
+}
+td.day span, td.timezone span {
+    position: relative;
+    z-index: 3;
+    text-wrap: nowrap;
+    padding: 0 5px;
+    line-height: 20px;
+    text-align: center;
+    max-width: calc(100dvw - 40px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+td.day span.fixed-horizontally {
+    position: fixed;
+    transform: translate(-50%, -10px);
+}
+td.timezone.summer, td.timezone.summer > span {
+    background: var(--timeline-background-color-summer);
+}
+td.timezone.winter, td.timezone.winter > span {
+    background: var(--timeline-background-color-winter);
+}
+td.odd-day, td.day.odd-day span {
+    background: var(--timeline-background-color-odd);
+}
+td.even-day, td.day.even-day span {
+    background: var(--timeline-background-color-even);
+}
+td.hour {
+    border: 1px solid var(--border-color);
+    text-align: center;
+    vertical-align: middle;
+    width: 60px;
+    height: 60px;
+}
+td:first-child {
+    border-left: none;
+}
+td:last-child {
+    border-right: none;
+}
+td.hour.highlighted.odd-day {
+    background: var(--highlighted-hours-color-odd);
+}
+td.hour.highlighted.even-day {
+    background: var(--highlighted-hours-color-even);
+}
+td.hour span {
+    display: inline-block;
+    position: relative;
+    left: -30px; /* Use the left border as a vertical "hour mark" */
+    max-width: 50px;
+    /* Give "hour labels" a background, to hide the left-border of the TD below them, */
+    /* but only 2px wide, to make sure they don't bleed (too much) into the previous hour. */
+    /* (Because the previous hour might have a different background color). */
+    background-repeat: no-repeat;
+    background-size: 2px 100%; /* X Y */
+    background-position: center top;
+}
+td.hour.odd-day span {
+    background-image: linear-gradient(var(--timeline-background-color-odd));
+}
+td.hour.even-day span {
+    background-image: linear-gradient(var(--timeline-background-color-even));
+}
+td.hour.highlighted.odd-day span {
+    background-image: linear-gradient(var(--highlighted-hours-color-odd));
+}
+td.hour.highlighted.even-day span {
+    background-image: linear-gradient(var(--highlighted-hours-color-even));
+}
+div.time-indicator {
+    border: 3px solid var(--indicator-color);
+    padding: 5px;
+    background: var(--time-indicator-background-color);
+    color: var(--indicator-color);
+    /* Using a fixed-width font prevents tiny width variations when scrolling */
+    font-family: var(--monospaced-font-family);
+    line-height: 19px; /* Total height = 19 (line-height) + 2 x 5 (padding) + 2 x 3 (border) = 35 */
+    transform: translate(-50%, round(calc(-32px - 50%), 1px));
+    max-width: 50px;
+    text-align: center;
+}
+
+/******************************************************************************/
+/* Wide screens / Narrow screens */
+.wide-screens-only {
+    display: none;
+}
+td.timezone {
+    height: 40px;
+}
+td.timezone span.fixed-horizontally {
+    position: fixed;
+    transform: translate(-50%, -20px);
+}
+@media (min-width: 740px) {
+    /* On desktops, timezone descriptions should fit on a single line */
+    .narrow-screens-only {
+        display: none;
+    }
+    .wide-screens-only {
+        display: initial;
+    }
+    td.timezone {
+        height: 20px;
+    }
+    td.timezone span.fixed-horizontally {
+        transform: translate(-50%, -10px);
+    }
+}
+
+/******************************************************************************/
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    #menu, div.dialog-overlay, div.dialog-content, .select-wrapper svg, li.search-result button svg {
+        transition: none;
+    }
+}
