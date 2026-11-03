@@ -4,7 +4,9 @@ A small web app to quickly visualize the time in multiple time zones.
 
 > *It's five o'clock somewhere.*
 
-![Animated preview](doc/animated-preview.avif)
+[![Animated preview](doc/animated-preview.avif)](https://slash-fr.github.io/timezone-comparison/)
+
+➡️ https://slash-fr.github.io/timezone-comparison/
 
 
 ## Features
